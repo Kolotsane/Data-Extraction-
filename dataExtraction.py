@@ -13,12 +13,12 @@ for file_name in os.listdir('invoices'):
     page_count = read_pdf.getNumPages()
     first_page = read_pdf.getPage(0)
     page_content = first_page.extractText()
-    # print(page_content)
 
     try:
+        # print(page_content)
         # company_name = re.search(r'Company(.*)', page_content).group().split("Company")[1]
         # print(company_name)
-        # address = invoice_no = re.search(r'Address(.*)', page_content).group().split("Address")[1]
+        # address = re.search(r'Address(.*)', page_content).group().split("Address")[1]
         # print(address)
         # email = re.search(r'([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)', page_content).group()
         # print(email)
