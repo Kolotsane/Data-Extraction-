@@ -2,10 +2,12 @@ import PyPDF2
 import os
 import re
 import openpyxl
+import datetime
 
 excelsheet = openpyxl.load_workbook('Invoice_Information.xlsx')
 sheet = excelsheet['Sheet1']
 
+# Extracting data from the multiple pdf files
 for file_name in os.listdir('invoices'):
     print(file_name)
     load_pdf = open(r'C:\\Users\\KOLOTSANE\\PycharmProjects\\DataExtraction\\invoices\\' + file_name, 'rb')
@@ -15,35 +17,52 @@ for file_name in os.listdir('invoices'):
     page_content = first_page.extractText()
 
     try:
+
         # print(page_content)
-        # company_name = re.search(r'Company(.*)', page_content).group().split("Company")[1]
-        # print(company_name)
-        # address = re.search(r'Address(.*)', page_content).group().split("Address")[1]
-        # print(address)
-        # email = re.search(r'([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)', page_content).group()
-        # print(email)
-        invoice_no = re.search(r'Invoice Number(.*)', page_content).group().split("Invoice Number")[1]
+        # Finding the arrays of required data
+        total = re.findall(r'(?<!\S)(?:(?:cad|[$]|usd|R|M|P) ?[\d,.]+|[\d.,]+(?:cad|[$]|usd))(?!\S)', page_content)
+        total1 = total[len(total)-1]
+        print(total1)
+
+        invoice_date = re.findall(r'(?:\d{1,2}[-/th|st|nd|rd\s]*)?(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)?[a-z\s,.]*(?:\d{1,2}[-/th|st|nd|rd)\s,]*)+(?:\d{2,4})+', page_content)
+        # sorted(invoice_date, key=lambda x: datetime.datetime.strptime(x, '%d-|/| %m-|/| %Y'))
+        for i in invoice_date:
+            match = re.search("[0-9]{2}\/[0-9]{2}\/[0-9]{4}", i)
+            match1 = re.search("[0-9]{2}\-[0-9]{2}\-[0-9]{4}", i)
+            match2 = re.search(r'(?:[\s]?\d{1,2}[-/th|st|nd|rd\s]*)?(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)?[a-z\s,./]*(?:\d{1,2}[-/th|st|nd|rd)\s,]*)?(?:\d{2,4})', i)
+            if match:
+                date = match.group()
+                print(date)
+            elif match1:
+                date = match1.group()
+                print(date)
+            elif match2:
+                date = match2.group()
+                print(date)
+
+        # print(invoice_date)
+
+        email = re.findall(r'([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)', page_content)
+        email1 = email[0]
+        print(email1)
+
+        invoice_no = re.search(r'[A-Z]{2,4}[0-9]{4,12}', page_content).group()
         print(invoice_no)
-        invoice_date = re.search(r'Invoice Date (.*)', page_content).group().split("Invoice Date")[1]
-        print(invoice_date)
-        due_date = re.search(r'Due Date (.*)', page_content).group().split("Due Date")[1]
-        print(due_date)
-        sub_total = re.search(r'Sub Total (.*)', page_content).group().split("Sub Total")[1]
-        print(sub_total)
-        total = re.search(r'Total Due (.*)', page_content).group().split("Total Due")[1]
-        print(total)
 
-        last_row_number = sheet.max_row
-        print(last_row_number)
+        # Storing data in excel file
 
-        sheet.cell(column=1, row=last_row_number + 1).value = invoice_no
-        sheet.cell(column=2, row=last_row_number + 1).value = invoice_date
-        sheet.cell(column=3, row=last_row_number + 1).value = due_date
-        sheet.cell(column=4, row=last_row_number + 1).value = sub_total
-        sheet.cell(column=5, row=last_row_number + 1).value = total
-
-        # saving a file
-        excelsheet.save('Invoice_Information.xlsx')
+        # last_row_number = sheet.max_row
+        # print(last_row_number)
+        #
+        # sheet.cell(column=1, row=last_row_number + 1).value = invoice_no
+        # sheet.cell(column=2, row=last_row_number + 1).value = invoice_date
+        # sheet.cell(column=3, row=last_row_number + 1).value = invoice_date
+        # sheet.cell(column=4, row=last_row_number + 1).value = total1
+        # sheet.cell(column=5, row=last_row_number + 1).value = total1
+        #
+        # # saving a file
+        # excelsheet.save('Invoice_Information.xlsx')
     except:
         print("Process failed")
+        print('\n')
 
